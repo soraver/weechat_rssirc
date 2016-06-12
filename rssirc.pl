@@ -82,6 +82,10 @@ sub ri_xmlget {
   my @colors = ("cyan","magenta","green","brown","lightblue","default",
     "lightcyan","lightmagenta","lightgreen","blue","31","35","38","40","49",
     "63","70","80","92","99","112","126","130","138","142","148","160","162",
+    "167","169","174","176","178","184","186","210","212","215","247",
+    "cyan","magenta","green","brown","lightblue","default",
+    "lightcyan","lightmagenta","lightgreen","blue","31","35","38","40","49",
+    "63","70","80","92","99","112","126","130","138","142","148","160","162",
     "167","169","174","176","178","184","186","210","212","215","247");
   my $i=0;
   open FILE, $listoflinks or die $!;
@@ -183,8 +187,9 @@ sub maxlength {
   return $current_window_width;
 }
 
-sub buildbuffers {
+sub ri_buildbuffers {
   open FILE, $listoflinks or die $!;
+  #debg('mphke');
   my $i = 2; #buffers position
   my %a;
   while(<FILE>) {
@@ -192,6 +197,8 @@ sub buildbuffers {
     next unless /\|/;
     my($buffer_name,$name,$url) = split ('\|', $_);
     next if exists($a{$buffer_name});
+    next if weechat::buffer_search('perl', $buffer_name);
+
     my $buffer = weechat::buffer_new($buffer_name, "", "", "", "");
     $a{$buffer_name} = 1;
     $buffer_name = ucfirst($buffer_name)." ";
@@ -204,8 +211,8 @@ sub buildbuffers {
 
 
 weechat::register($script_name, "soraver", "0.3", "GPL3", "RSS to IRC", "", "");
-buildbuffers;
-
+ri_buildbuffers;
+weechat::hook_timer(300000, 0, 0, "ri_buildbuffers", "");
 weechat::hook_timer(300000, 0, 0, "timer_cb", "");
 timer_cb;
 
